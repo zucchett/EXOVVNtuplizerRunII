@@ -23,7 +23,7 @@ config["DOGENEVENT"] = (True and config["RUNONMC"])
 config["DOPILEUP"] = (True and config["RUNONMC"])
 config["DOELECTRONS"] = True
 config["DOMUONS"] = True
-config["DOTAUS"] = False
+config["DOTAUS"] = True
 config["DOAK8JETS"] = True
 config["DOAK4JETS"] = True
 config["DOVERTICES"] = True
@@ -53,4 +53,4 @@ config["CORRJETSONTHEFLY"] = True # at the moment JEC available just for MC Fall
 config["CORRMETONTHEFLY"] = True  # at the moment JEC available just for MC Fall17
 config["GETJECFROMDBFILE"] = False # If not yet in global tag, but db file available
 #--------- TAU ----------#
-config["DOMULTIPLETAUMVAVERSIONS"] = False #This flag eneables the possibility to access a sqlite *db file and save the latest training of the tau MVA isolation "v2" in parellel as the one of "v1" taken from the CMSSW database.
+config["DOMULTIPLETAUMVAVERSIONS"] = True #This flag eneables the possibility to access a sqlite *db file and save the latest training of the tau MVA isolation "v2" in parellel as the one of "v1" taken from the CMSSW database.

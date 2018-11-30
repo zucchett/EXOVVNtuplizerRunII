@@ -1057,56 +1057,81 @@ from RecoTauTag.RecoTau.TauDiscriminatorTools import noPrediscriminants
 from RecoTauTag.RecoTau.PATTauDiscriminationByMVAIsolationRun2_cff import patDiscriminationByIsolationMVArun2v1raw, patDiscriminationByIsolationMVArun2v1VLoose
 
 
-
 tauIdDiscrMVA_trainings_run2_2017 = {
-  'tauIdMVAIsoDBoldDMwLT2017' : "tauIdMVAIsoDBoldDMwLT2017",
-  }
-tauIdDiscrMVA_WPs_run2_2017 = {
-  'tauIdMVAIsoDBoldDMwLT2017' : {
-    'Eff95' : "DBoldDMwLTEff95",
-    'Eff90' : "DBoldDMwLTEff90",
-    'Eff80' : "DBoldDMwLTEff80",
-    'Eff70' : "DBoldDMwLTEff70",
-    'Eff60' : "DBoldDMwLTEff60",
-    'Eff50' : "DBoldDMwLTEff50",
-    'Eff40' : "DBoldDMwLTEff40"
-    }
-  }
-tauIdDiscrMVA_2017_version = "v1"
+    'tauIdMVAIsoDBoldDMwLT2017' : "tauIdMVAIsoDBoldDMwLT2017",
+    'tauIdMVAIsoDBnewDMwLT2017' : "tauIdMVAIsoDBnewDMwLT2017",
+    'tauIdMVAIsoDBoldDMdR0p3wLT2017' : "tauIdMVAIsoDBoldDMdR0p3wLT2017",
+}
 
+
+tauIdDiscrMVA_WPs_run2_2017 = {
+    'tauIdMVAIsoDBoldDMwLT2017' : {
+        'Eff95' : "DBoldDMwLTEff95",
+        'Eff90' : "DBoldDMwLTEff90",
+        'Eff80' : "DBoldDMwLTEff80",
+        'Eff70' : "DBoldDMwLTEff70",
+        'Eff60' : "DBoldDMwLTEff60",
+        'Eff50' : "DBoldDMwLTEff50",
+        'Eff40' : "DBoldDMwLTEff40"
+    },
+    'tauIdMVAIsoDBnewDMwLT2017' : {
+        'Eff95' : "DBnewDMwLTEff95",
+        'Eff90' : "DBnewDMwLTEff90",
+        'Eff80' : "DBnewDMwLTEff80",
+        'Eff70' : "DBnewDMwLTEff70",
+        'Eff60' : "DBnewDMwLTEff60",
+        'Eff50' : "DBnewDMwLTEff50",
+        'Eff40' : "DBnewDMwLTEff40"
+    },
+    'tauIdMVAIsoDBoldDMdR0p3wLT2017' : {
+        'Eff95' : "DBoldDMdR0p3wLTEff95",
+        'Eff90' : "DBoldDMdR0p3wLTEff90",
+        'Eff80' : "DBoldDMdR0p3wLTEff80",
+        'Eff70' : "DBoldDMdR0p3wLTEff70",
+        'Eff60' : "DBoldDMdR0p3wLTEff60",
+        'Eff50' : "DBoldDMdR0p3wLTEff50",
+        'Eff40' : "DBoldDMdR0p3wLTEff40"
+    }
+}
+
+tauIdDiscrMVA_mvaOutput_normalizations_run2_2017 = {
+    'tauIdMVAIsoDBoldDMwLT2017' : "mvaOutput_normalization",
+    'tauIdMVAIsoDBnewDMwLT2017' : "mvaOutput_normalization",
+    'tauIdMVAIsoDBoldDMdR0p3wLT2017' : "mvaOutput_normalization"
+}
+
+# MVAIso 2017
 
 def loadMVA_WPs_run2_2017(process):
-                print "LoadMVA_WPs_run2_2017: performed::::"
-                #global cms
+  print "LoadMVA_WPs_run2_2017 Form unique DB file: performed::::"
+  tauIdDiscrMVA_2017_version = ["v1","v2"]
+  for ver2017 in tauIdDiscrMVA_2017_version:
+    for training, gbrForestName in tauIdDiscrMVA_trainings_run2_2017.items():
+      if ver2017=="v1" and (training.find("newDM")>-1 or training.find("dR0p3")>-1):
+            continue 
+      process.loadRecoTauTagMVAsFromPrepDB.toGet.append(
+        cms.PSet(
+          record = cms.string('GBRWrapperRcd'),
+          tag = cms.string("RecoTauTag_%s%s" % (gbrForestName, ver2017)),
+          label = cms.untracked.string("RecoTauTag_%s%s" % (gbrForestName, ver2017))
+          )
+        )
+      for WP in tauIdDiscrMVA_WPs_run2_2017[training].keys():
+        process.loadRecoTauTagMVAsFromPrepDB.toGet.append(
+          cms.PSet(
+            record = cms.string('PhysicsTGraphPayloadRcd'),
+            tag = cms.string("RecoTauTag_%s%s_WP%s" % (gbrForestName, ver2017, WP)),
+            label = cms.untracked.string("RecoTauTag_%s%s_WP%s" % (gbrForestName, ver2017, WP))
+            )
+          )
+        process.loadRecoTauTagMVAsFromPrepDB.toGet.append(
+          cms.PSet(
+            record = cms.string('PhysicsTFormulaPayloadRcd'),
+            tag = cms.string("RecoTauTag_%s%s_mvaOutput_normalization" % (gbrForestName, ver2017)),
+            label = cms.untracked.string("RecoTauTag_%s%s_mvaOutput_normalization" % (gbrForestName, ver2017))
+	    )
+          )
 
-
-
-		for training, gbrForestName in tauIdDiscrMVA_trainings_run2_2017.items():
-
-			process.loadRecoTauTagMVAsFromPrepDB.toGet.append(
-				cms.PSet(
-					record = cms.string('GBRWrapperRcd'),
-					tag = cms.string("RecoTauTag_%s%s" % (gbrForestName, tauIdDiscrMVA_2017_version)),
-					label = cms.untracked.string("RecoTauTag_%s%s" % (gbrForestName, tauIdDiscrMVA_2017_version))
-				)
-			)
-
-			for WP in tauIdDiscrMVA_WPs_run2_2017[training].keys():
-				process.loadRecoTauTagMVAsFromPrepDB.toGet.append(
-					cms.PSet(
-						record = cms.string('PhysicsTGraphPayloadRcd'),
-						tag = cms.string("RecoTauTag_%s%s_WP%s" % (gbrForestName, tauIdDiscrMVA_2017_version, WP)),
-						label = cms.untracked.string("RecoTauTag_%s%s_WP%s" % (gbrForestName, tauIdDiscrMVA_2017_version, WP))
-					)
-				)
-
-			process.loadRecoTauTagMVAsFromPrepDB.toGet.append(
-				cms.PSet(
-					record = cms.string('PhysicsTFormulaPayloadRcd'),
-					tag = cms.string("RecoTauTag_%s%s_mvaOutput_normalization" % (gbrForestName, tauIdDiscrMVA_2017_version)),
-					label = cms.untracked.string("RecoTauTag_%s%s_mvaOutput_normalization" % (gbrForestName, tauIdDiscrMVA_2017_version))
-				)
-)
 
 
 
@@ -1173,7 +1198,7 @@ process.rerunMvaIsolation2SeqRun2 = cms.Sequence(
 
 
 # embed new id's into new tau collection
-if  not config["DOMULTIPLETAUMVAVERSIONS"]:
+if not config["DOMULTIPLETAUMVAVERSIONS"]:
   embedID = cms.EDProducer("PATTauIDEmbedder",
                            src = cms.InputTag('slimmedTaus'),
                            tauIDSources = cms.PSet(
@@ -1192,112 +1217,8 @@ if  not config["DOMULTIPLETAUMVAVERSIONS"]:
 
 if  config["DOMULTIPLETAUMVAVERSIONS"]:
 
-
-  from CondCore.DBCommon.CondDBSetup_cfi import *
-
-
-  process.loadRecoTauTagMVAsFromPrepDB2 = cms.ESSource("PoolDBESSource",
-
-                                                       CondDBSetup,
-                                                       DumpStat = cms.untracked.bool(False),
-                                                       toGet = cms.VPSet(),                                             
-                                                       #  connect = cms.string("frontier://FrontierPrep/CMS_COND_PHYSICSTOOLS") # prep database
-                                                       #connect = cms.string('frontier://FrontierProd/CMS_CONDITIONS') # prod database
-                                                       connect = cms.string('sqlite_file:RecoTauTag_MVAs_2018Mar15.db')
-  )
-
-  #process.loadRecoTauTagMVAsFromPrepDB2
-
-  tauIdDiscrMVA_trainings_run2_2017_v2 = {
-    'tauIdMVAIsoDBoldDMwLT2017' : "tauIdMVAIsoDBoldDMwLT2017",
-    'tauIdMVAIsoDBnewDMwLT2017' : "tauIdMVAIsoDBnewDMwLT2017",
-    'tauIdMVAIsoDBoldDMdR0p3wLT2017' : "tauIdMVAIsoDBoldDMdR0p3wLT2017",
-    }
-  tauIdDiscrMVA_WPs_run2_2017_v2 = {
-    'tauIdMVAIsoDBoldDMwLT2017' : {
-      'Eff95' : "DBoldDMwLTEff95",
-      'Eff90' : "DBoldDMwLTEff90",
-      'Eff80' : "DBoldDMwLTEff80",
-      'Eff70' : "DBoldDMwLTEff70",
-      'Eff60' : "DBoldDMwLTEff60",
-      'Eff50' : "DBoldDMwLTEff50",
-      'Eff40' : "DBoldDMwLTEff40"
-      } ,
-    'tauIdMVAIsoDBnewDMwLT2017' : {
-      'Eff95' : "DBnewDMwLTEff95",
-      'Eff90' : "DBnewDMwLTEff90",
-      'Eff80' : "DBnewDMwLTEff80",
-      'Eff70' : "DBnewDMwLTEff70",
-      'Eff60' : "DBnewDMwLTEff60",
-      'Eff50' : "DBnewDMwLTEff50",
-      'Eff40' : "DBnewDMwLTEff40"
-      } ,
-    'tauIdMVAIsoDBoldDMdR0p3wLT2017' : {
-      'Eff95' : "DBoldDMdR0p3wLTEff95",
-      'Eff90' : "DBoldDMdR0p3wLTEff90",
-      'Eff80' : "DBoldDMdR0p3wLTEff80",
-      'Eff70' : "DBoldDMdR0p3wLTEff70",
-      'Eff60' : "DBoldDMdR0p3wLTEff60",
-      'Eff50' : "DBoldDMdR0p3wLTEff50",
-      'Eff40' : "DBoldDMdR0p3wLTEff40"
-     }
-    }
-  tauIdDiscrMVA_2017_v2_version = "v2"
-
-  tauIdDiscrMVA_mvaOutput_normalizations_v2 = {
-    'tauIdMVAIsoDBoldDMwLT2017' : "tauIdMVAIsoDBoldDMwLT_2017v2_dR0p5",
-    'tauIdMVAIsoDBnewDMwLT2017' : "tauIdMVAIsoDBnewDMwLT_2017v2_dR0p5",
-    'tauIdMVAIsoDBoldDMdR0p3wLT2017' : "tauIdMVAIsoDBoldDMwLT_2017v2_dR0p3",
-    }
-  def loadMVA_WPs_run2_2017_v2(process):
-                  print "LoadMVA_WPs_run2_2017_v2: performed::::"
-                  #global cms
-
-
-                  for training, gbrForestName in tauIdDiscrMVA_trainings_run2_2017_v2.items():
-                          print " printing tauIdDiscrMVA_trainings_run2_2017_v2.items(),  training %s , gbrForestName %s" %(training, gbrForestName)
-                          print " tauIdDiscrMVA_mvaOutput_normalizations_v2[training] %s"% tauIdDiscrMVA_mvaOutput_normalizations_v2[training]
-                          print "printato"
  
-                          process.loadRecoTauTagMVAsFromPrepDB2.toGet.append(
-                                  cms.PSet(
-                                          record = cms.string('GBRWrapperRcd'),
-                                          tag = cms.string("RecoTauTag_%s%s" % (gbrForestName, tauIdDiscrMVA_2017_v2_version)),
-                                          label = cms.untracked.string("RecoTauTag_%s%s" % (gbrForestName, tauIdDiscrMVA_2017_v2_version))
-                                  )
-                          )
-
-                          for WP in tauIdDiscrMVA_WPs_run2_2017_v2[training].keys():
-                                  process.loadRecoTauTagMVAsFromPrepDB2.toGet.append(
-                                          cms.PSet(
-                                                  record = cms.string('PhysicsTGraphPayloadRcd'),
-                                                  tag = cms.string("RecoTauTag_%s%s_WP%s" % (gbrForestName, tauIdDiscrMVA_2017_v2_version, WP)),
-                                                  label = cms.untracked.string("RecoTauTag_%s%s_WP%s" % (gbrForestName, tauIdDiscrMVA_2017_v2_version, WP))
-                                          )
-                                  )
-
-                          process.loadRecoTauTagMVAsFromPrepDB2.toGet.append(
-                                  cms.PSet(
-                                          record = cms.string('PhysicsTFormulaPayloadRcd'),
-                                          tag = cms.string("RecoTauTag_%s_mvaOutput_normalization" % (tauIdDiscrMVA_mvaOutput_normalizations_v2[training])),
-                                          label = cms.untracked.string("RecoTauTag_%s_mvaOutput_normalization" % (tauIdDiscrMVA_mvaOutput_normalizations_v2[training]))### https://github.com/cgalloni/cmssw/blob/CMSSW_8_0_X/RecoTauTag/Configuration/python/loadRecoTauTagMVAsFromPrepDB_cfi.py
-                                          #tag = cms.string("RecoTauTag_tauIdMVAIsoDBoldDMwLT_2017v2_dR0p5_mvaOutput_normalization"),
-                                          #label = cms.untracked.string("RecoTauTag_tauIdMVAIsoDBoldDMwLT_2017v2_dR0p5_mvaOutput_normalization"),
-
-                                  )
-  )
-
-
-
-
-
-
-
-  #======= for v2
-
-
-  loadMVA_WPs_run2_2017_v2(process)
-
+ 
   process.rerunDiscriminationByIsolationMVArun2v2raw = patDiscriminationByIsolationMVArun2v1raw.clone(
      PATTauProducer = cms.InputTag('slimmedTaus'),
      Prediscriminants = noPrediscriminants,
@@ -1315,7 +1236,7 @@ if  config["DOMULTIPLETAUMVAVERSIONS"]:
      toMultiplex = cms.InputTag('rerunDiscriminationByIsolationMVArun2v2raw'),
      key = cms.InputTag('rerunDiscriminationByIsolationMVArun2v2raw:category'),
      loadMVAfromDB = cms.bool(True),
-     mvaOutput_normalization = cms.string("RecoTauTag_tauIdMVAIsoDBoldDMwLT_2017v2_dR0p5_mvaOutput_normalization"), # normalization fo the training you want to use
+     mvaOutput_normalization = cms.string("RecoTauTag_tauIdMVAIsoDBoldDMwLT2017v2_mvaOutput_normalization"), # normalization fo the training you want to use
      mapping = cms.VPSet(
         cms.PSet(
            category = cms.uint32(0),
@@ -1369,7 +1290,7 @@ if  config["DOMULTIPLETAUMVAVERSIONS"]:
      toMultiplex = cms.InputTag('rerunDiscriminationByIsolationMVArun2v2newDMraw'),
      key = cms.InputTag('rerunDiscriminationByIsolationMVArun2v2newDMraw:category'),
      loadMVAfromDB = cms.bool(True),
-     mvaOutput_normalization = cms.string("RecoTauTag_tauIdMVAIsoDBnewDMwLT_2017v2_dR0p5_mvaOutput_normalization"), # normalization fo the training you want to use                                                                             
+     mvaOutput_normalization = cms.string("RecoTauTag_tauIdMVAIsoDBnewDMwLT2017v2_mvaOutput_normalization"), # normalization fo the training you want to use                                                                             
      mapping = cms.VPSet(
         cms.PSet(
            category = cms.uint32(0),
@@ -1425,7 +1346,7 @@ if  config["DOMULTIPLETAUMVAVERSIONS"]:
      toMultiplex = cms.InputTag('rerunDiscriminationByIsolationMVArun2v2dR0p3raw'),
      key = cms.InputTag('rerunDiscriminationByIsolationMVArun2v2dR0p3raw:category'),
      loadMVAfromDB = cms.bool(True),
-     mvaOutput_normalization = cms.string("RecoTauTag_tauIdMVAIsoDBoldDMwLT_2017v2_dR0p3_mvaOutput_normalization"), #RecoTauTag_tauIdMVAIsoDBoldDMwLT_2017v2_dR0p3_mvaOutput_normalization normalization fo the training you want to use
+     mvaOutput_normalization = cms.string("RecoTauTag_tauIdMVAIsoDBoldDMdR0p3wLT2017v2_mvaOutput_normalization"), #RecoTauTag_tauIdMVAIsoDBoldDMwLT_2017v2_dR0p3_mvaOutput_normalization normalization fo the training you want to use
      mapping = cms.VPSet(
         cms.PSet(
            category = cms.uint32(0),
