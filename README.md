@@ -39,6 +39,15 @@ scram b -j 8
 ```
 
 
+### add the MET reclustering with the fix for 2017 with EE noise mitigation
+(https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETUncertaintyPrescription#Instructions_for_9_4_X_X_9_for_2)
+```
+cd $CMSSW_BASE/src
+git cms-merge-topic cms-met:METFixEE2017_949_v2
+cd $CMSSW_BASE/src
+scram b -j 8
+```
+
 ### running for data and MC
 Just set the proper flag in python/ntuplizerOptions_generic_cfi.py
 
