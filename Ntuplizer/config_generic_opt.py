@@ -632,18 +632,18 @@ if reclusterPuppi:
 # ###### Recluster MET ##########
 if config["DOMETRECLUSTERING"]:
 
-  from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
-		  
-  switchJetCollection(process,
-                      jetSource = cms.InputTag('ak4PFJetsCHS'),
-                      jetCorrections = ('AK4PFchs', jet_corr_levels, ''),
-                      genParticles = cms.InputTag('prunedGenParticles'),
-                      pvSource = cms.InputTag('offlineSlimmedPrimaryVertices')
-                      )
-		  		
-  process.patJets.addGenJetMatch = cms.bool(False) 
-  process.patJets.addGenPartonMatch = cms.bool(False) 
-  process.patJets.addPartonJetMatch = cms.bool(False) 
+#  from PhysicsTools.PatAlgos.tools.jetTools import switchJetCollection
+#		  
+#  switchJetCollection(process,
+#                      jetSource = cms.InputTag('ak4PFJetsCHS'),
+#                      jetCorrections = ('AK4PFchs', jet_corr_levels, ''),
+#                      genParticles = cms.InputTag('prunedGenParticles'),
+#                      pvSource = cms.InputTag('offlineSlimmedPrimaryVertices')
+#                      )
+#		  		
+#  process.patJets.addGenJetMatch = cms.bool(False) 
+#  process.patJets.addGenPartonMatch = cms.bool(False) 
+#  process.patJets.addPartonJetMatch = cms.bool(False) 
   
   from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
@@ -654,6 +654,7 @@ if config["DOMETRECLUSTERING"]:
           fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold': 3.139} ,
           postfix = "ModifiedMET"
   )
+  
 
 #  #default configuration for miniAOD reprocessing, change the isData flag to run on data
 #  #for a full met computation, remove the pfCandColl input
@@ -727,12 +728,12 @@ jetsAK8softdrop = ""
 jetsAK10trimmed = ""
 jetsAK8Puppi = ""  
 
-METS = "slimmedMETs"
+METS = "slimmedMETsModifiedMET" if config["DOMETRECLUSTERING"] else "slimmedMETs"
 METS_EGclean = "slimmedMETsEGClean"
 METS_MEGclean = "slimmedMETsMuEGClean"
 METS_uncorr = "slimmedMETsUncorrected"
 
-if config["DOMETRECLUSTERING"]: jetsAK4 = "selectedPatJets"
+#if config["DOMETRECLUSTERING"]: jetsAK4 = "selectedPatJets"
 if config["USENOHF"]: METS = "slimmedMETsNoHF"  
 
 ##___________________ MET significance and covariance matrix ______________________##

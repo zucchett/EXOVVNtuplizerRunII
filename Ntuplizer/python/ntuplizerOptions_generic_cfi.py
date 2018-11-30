@@ -46,7 +46,7 @@ config["DOAK8PUPPIRECLUSTERING"] = False
 config["UpdateJetCollection"] = False #needed for Higgs-tagger in 80X
 
 #--------- MET reclustering ----------#
-config["DOMETRECLUSTERING"] = False
+config["DOMETRECLUSTERING"] = True
 
 #--------- JEC ----------#
 config["CORRJETSONTHEFLY"] = True # at the moment JEC available just for MC Fall17
