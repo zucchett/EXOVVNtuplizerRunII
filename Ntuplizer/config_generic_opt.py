@@ -647,22 +647,30 @@ if config["DOMETRECLUSTERING"]:
   
   from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
-  #default configuration for miniAOD reprocessing, change the isData flag to run on data
-  #for a full met computation, remove the pfCandColl input
-  runMetCorAndUncFromMiniAOD(process,
-                           isData=not(config["RUNONMC"]),
-                           )
-  process.patPFMetT1T2Corr.type1JetPtThreshold = cms.double(15.0)
-  process.patPFMetT2Corr.type1JetPtThreshold = cms.double(15.0)
-  process.slimmedMETs.t01Variation = cms.InputTag("slimmedMETs","","RECO")
-  
-  if config["RUNONMC"]:
-    process.patPFMetT1T2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-    process.patPFMetT1T2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-    process.patPFMetT2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-    process.patPFMetT2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
-    process.shiftedPatJetEnDown.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
-    process.shiftedPatJetEnUp.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
+  runMetCorAndUncFromMiniAOD (
+          process,
+          isData = not(config["RUNONMC"]), # false for MC
+          fixEE2017 = True,
+          fixEE2017Params = {'userawPt': True, 'ptThreshold':50.0, 'minEtaThreshold':2.65, 'maxEtaThreshold': 3.139} ,
+          postfix = "ModifiedMET"
+  )
+
+#  #default configuration for miniAOD reprocessing, change the isData flag to run on data
+#  #for a full met computation, remove the pfCandColl input
+#  runMetCorAndUncFromMiniAOD(process,
+#                           isData=not(config["RUNONMC"]),
+#                           )
+#  process.patPFMetT1T2Corr.type1JetPtThreshold = cms.double(15.0)
+#  process.patPFMetT2Corr.type1JetPtThreshold = cms.double(15.0)
+#  process.slimmedMETs.t01Variation = cms.InputTag("slimmedMETs","","RECO")
+#  
+#  if config["RUNONMC"]:
+#    process.patPFMetT1T2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.patPFMetT1T2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.patPFMetT2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.patPFMetT2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
+#    process.shiftedPatJetEnDown.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
+#    process.shiftedPatJetEnUp.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
 			           
 ####### Adding HEEP id ##########
 
@@ -681,12 +689,13 @@ process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
 #                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff']
       
 my_id_modules = [
-                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Fall17_94X_V2_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff', # is anyone using this?
                  'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff',
                  'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso_V1_cff',
                  ]
-           
+   
+
 
 #add them to the VID producer
 for idmod in my_id_modules:
@@ -938,10 +947,10 @@ process.ntuplizer = cms.EDAnalyzer("Ntuplizer",
 #    eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
 #    eleTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
 
-    eleVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V1-veto"),
-    eleLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V1-loose"),
-    eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V1-medium"),
-    eleTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V1-tight"),
+    eleVetoIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-veto"),
+    eleLooseIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-loose"),
+    eleMediumIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-medium"),
+    eleTightIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Fall17-94X-V2-tight"),
 
     eleHLTIdMap = cms.InputTag("egmGsfElectronIDs:cutBasedElectronHLTPreselection-Summer16-V1"), 
     eleHEEPIdMap = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV70"),
