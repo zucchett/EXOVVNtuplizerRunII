@@ -564,12 +564,13 @@ void JetsNtuplizer::fillBranches( edm::Event const & event, const edm::EventSetu
       nBranches_->jetAK8_tau1               .push_back(fj.userFloat("NjettinessAK8Puppi:tau1"));	  
       nBranches_->jetAK8_tau2               .push_back(fj.userFloat("NjettinessAK8Puppi:tau2"));
       nBranches_->jetAK8_tau3               .push_back(fj.userFloat("NjettinessAK8Puppi:tau3")); 
-      //nBranches_->jetAK8_tau4             .push_back(fj.userFloat("ak8PFJetsCHSValueMap:NjettinessAK8CHSTau4")); 
+      nBranches_->jetAK8_tau4               .push_back(fj.userFloat("NjettinessAK8Puppi:tau4")); //ak8PFJetsCHSValueMap:NjettinessAK8CHSTau4
       nBranches_->jetAK8_softdrop_mass      .push_back(fj.userFloat("ak8PFJetsPuppiSoftDropMass"));
       
       nBranches_->jetAK8_chs_tau1	          .push_back(fj.userFloat("ak8PFJetsCHSValueMap:NjettinessAK8CHSTau1"));	 
       nBranches_->jetAK8_chs_tau2	          .push_back(fj.userFloat("ak8PFJetsCHSValueMap:NjettinessAK8CHSTau2"));
       nBranches_->jetAK8_chs_tau3	          .push_back(fj.userFloat("ak8PFJetsCHSValueMap:NjettinessAK8CHSTau3")); 
+      nBranches_->jetAK8_chs_tau4	          .push_back(fj.userFloat("ak8PFJetsCHSValueMap:NjettinessAK8CHSTau4")); 
       nBranches_->jetAK8_chs_pruned_mass    .push_back(fj.userFloat("ak8PFJetsCHSValueMap:ak8PFJetsCHSPrunedMass"));
       nBranches_->jetAK8_chs_softdrop_mass  .push_back(fj.userFloat("ak8PFJetsCHSValueMap:ak8PFJetsCHSSoftDropMass"));
       
@@ -636,7 +637,7 @@ void JetsNtuplizer::fillBranches( edm::Event const & event, const edm::EventSetu
          vPuppiSoftDropSubjetcharge.push_back(puppi_softdropsubjet.charge());
          vPuppiSoftDropSubjetcsv.push_back(puppi_softdropsubjet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags") );
          vPuppiSoftDropSubjetcsv_deep_b.push_back(puppi_softdropsubjet.bDiscriminator("pfDeepCSVJetTags:probb") );
-	 vPuppiSoftDropSubjetcsv_deep_bb.push_back(puppi_softdropsubjet.bDiscriminator("pfDeepCSVJetTags:probbb"));
+	       vPuppiSoftDropSubjetcsv_deep_bb.push_back(puppi_softdropsubjet.bDiscriminator("pfDeepCSVJetTags:probbb"));
 
 
 

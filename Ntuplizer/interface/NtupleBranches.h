@@ -536,7 +536,7 @@ public:
   std::vector<float>  	      jetAK8_tau1              ;
   std::vector<float>  	      jetAK8_tau2              ;
   std::vector<float>  	      jetAK8_tau3              ; 
-  // std::vector<float>          jetAK8_tau4              ;
+  std::vector<float>          jetAK8_tau4              ;
   std::vector<float>  	      jetAK8_pull1             ; 
   std::vector<float>  	      jetAK8_pull2             ; 
   std::vector<float>              jetAK8_jer_sf        ; 
@@ -591,6 +591,7 @@ public:
   std::vector<float>          jetAK8_chs_tau1              ;
   std::vector<float>          jetAK8_chs_tau2              ;
   std::vector<float>          jetAK8_chs_tau3              ;
+  std::vector<float>          jetAK8_chs_tau4              ;
   std::vector<float>          jetAK8_chs_softdrop_mass     ;
 
   /** AK4 genJets*/

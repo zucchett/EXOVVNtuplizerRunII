@@ -42,7 +42,10 @@ options.register( 'runUpToEarlyF',
 
 ####
 
-options.maxEvents = -1
+process.load('FWCore.MessageService.MessageLogger_cfi')
+process.MessageLogger.cerr.threshold = 'ERROR'
+
+options.maxEvents = 1000
 
 #data file
 
@@ -63,7 +66,7 @@ options.parseArguments()
 
 print " options.RunPeriod ", options.RunPeriod
 process.options  = cms.untracked.PSet( 
-                     wantSummary = cms.untracked.bool(True),
+                     wantSummary = cms.untracked.bool(False),
                      SkipEvent = cms.untracked.vstring('ProductNotFound'),
                      allowUnscheduled = cms.untracked.bool(True)
                      )
@@ -377,7 +380,7 @@ if config["ADDAK8GENJETS"]:
                      patJetsAK8.clone( jetSource = 'ak8GenJets' ),
                      process,pattask)
 
-  process.genJetsAK8.userData.userFloats.src = [ cms.InputTag("ak8GenJetsPrunedMass"), cms.InputTag("ak8GenJetsSoftDropMass"), cms.InputTag("NjettinessGenAK8:tau1"), cms.InputTag("NjettinessGenAK8:tau2"), cms.InputTag("NjettinessGenAK8:tau3")]
+  process.genJetsAK8.userData.userFloats.src = [ cms.InputTag("ak8GenJetsPrunedMass"), cms.InputTag("ak8GenJetsSoftDropMass"), cms.InputTag("NjettinessGenAK8:tau1"), cms.InputTag("NjettinessGenAK8:tau2"), cms.InputTag("NjettinessGenAK8:tau3"), cms.InputTag("NjettinessGenAK8:tau4")]
   process.genJetsAK8.addJetCorrFactors = cms.bool(False)
   process.genJetsAK8.jetCorrFactorsSource = cms.VInputTag( cms.InputTag("") )
 
@@ -567,7 +570,7 @@ if config["DOAK8RECLUSTERING"]:
                                             )    
 					         
     process.patJetsAk8CHSJets.userData.userFloats.src += ['ak8PFJetsCHSPrunedMass','ak8PFJetsCHSSoftDropMass','ak8PFJetsCHSPrunedMassCorrected','ak8PFJetsCHSSoftDropMassCorrected']
-    process.patJetsAk8CHSJets.userData.userFloats.src += ['NjettinessAK8:tau1','NjettinessAK8:tau2','NjettinessAK8:tau3']
+    process.patJetsAk8CHSJets.userData.userFloats.src += ['NjettinessAK8:tau1','NjettinessAK8:tau2','NjettinessAK8:tau3','NjettinessAK8:tau4']
     process.patJetsAk8CHSJets.addTagInfos = True
     #process.patJetsAk8CHSJetsSoftDropSubjets.addBTagInfo = True
 
@@ -610,7 +613,7 @@ if reclusterPuppi:
 
     process.patJetsAk8PuppiJets.userData.userFloats.src += ['ak8PFJetsPuppiSoftDropMass','ak8PFJetsPuppiSoftDropMassCorrected']
     #process.patJetsAk8PuppiJets.userData.userFloats.src += ['ak8PFJetsPuppiPrunedMass','ak8PFJetsPuppiPrunedMassCorrected']
-    process.patJetsAk8PuppiJets.userData.userFloats.src += ['NjettinessAK8Puppi:tau1','NjettinessAK8Puppi:tau2','NjettinessAK8Puppi:tau3']
+    process.patJetsAk8PuppiJets.userData.userFloats.src += ['NjettinessAK8Puppi:tau1','NjettinessAK8Puppi:tau2','NjettinessAK8Puppi:tau3','NjettinessAK8Puppi:tau4']
     process.patJetsAk8PuppiJets.addTagInfos = True
 
     process.packedJetsAk8PuppiJets = cms.EDProducer("JetSubstructurePacker",
