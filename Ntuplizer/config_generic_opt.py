@@ -65,6 +65,7 @@ options.parseArguments()
 #print sys.argv
 
 print " options.RunPeriod ", options.RunPeriod
+exit()
 process.options  = cms.untracked.PSet( 
                      wantSummary = cms.untracked.bool(False),
                      SkipEvent = cms.untracked.vstring('ProductNotFound'),
@@ -228,40 +229,6 @@ if reclusterPuppi:
   process.ak8PuppiJetsSoftDrop = ak8PFJetsCHSSoftDrop.clone( src = 'puppi', jetPtMin = fatjet_ptmin, beta = betapar  )
   process.NjettinessAK8Puppi = process.NjettinessAK8.clone( src = 'ak8PuppiJets' )
 
-if config["GETJECFROMDBFILE"]:
-  process.load("CondCore.DBCommon.CondDBCommon_cfi")
-  process.jec = cms.ESSource("PoolDBESSource",
-            DBParameters = cms.PSet(
-                messageLevel = cms.untracked.int32(5)
-                ),
-            timetype = cms.string('runnumber'),
-            toGet = cms.VPSet(
-            cms.PSet(
-                 record = cms.string('JetCorrectionsRecord'),
-                 tag    = cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_MC_AK4PFchs'),
-                 label  = cms.untracked.string('AK4PFchs')
-                 ),
-            cms.PSet(
-                 record = cms.string('JetCorrectionsRecord'),
-                 tag    = cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_MC_AK8PFchs'),
-                 label  = cms.untracked.string('AK8PFchs')
-                 ),
-            cms.PSet(
-                 record = cms.string('JetCorrectionsRecord'),
-                 tag    = cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_MC_AK8PFPuppi'),
-                 label  = cms.untracked.string('AK8PFPuppi')
-                 ),
-            ),
-            connect = cms.string('sqlite:JEC/Summer15_50nsV5_MC.db')
-            )
-  if not config["RUNONMC"]:
-    process.jec.toGet[0].tag =  cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_DATA_AK4PFchs')
-    process.jec.toGet[1].tag =  cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_DATA_AK8PFchs')
-    process.jec.toGet[2].tag =  cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_DATA_AK8PFPuppi')
-    process.jec.connect = cms.string('sqlite:JEC/Summer15_50nsV5_DATA.db')
-  process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
-
-
 
 ####### Add AK8 GenJets ##########
 if config["ADDAK8GENJETS"]:
@@ -407,14 +374,14 @@ bTagDiscriminators = [
 #Needed in 80X to get the latest Hbb training
 if config["UpdateJetCollection"]:
   from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
-## Update the slimmedJets in miniAOD: corrections from the chosen Global Tag are applied and the b-tag discriminators are re-evaluated
+  ## Update the slimmedJets in miniAOD: corrections from the chosen Global Tag are applied and the b-tag discriminators are re-evaluated
   updateJetCollection(
     process,
     jetSource = cms.InputTag('slimmedJetsAK8'),
     jetCorrections = ('AK8PFchs', cms.vstring(jetcorr_levels), 'None'),
     btagDiscriminators = bTagDiscriminators
   )
-## Update to latest PU jet ID training
+  ## Update to latest PU jet ID training
   process.load("RecoJets.JetProducers.PileupJetID_cfi")
   # requires cnadidate track covaranice matrix, which isn't in miniaod anymore
   #addToProcessAndTask('pileupJetIdUpdated',
@@ -629,6 +596,10 @@ if reclusterPuppi:
             packedPFCandidates = cms.InputTag("packedPFCandidates"),
     )
 
+
+
+
+
 # ###### Recluster MET ##########
 if config["DOMETRECLUSTERING"]:
 
@@ -671,8 +642,229 @@ if config["DOMETRECLUSTERING"]:
 #    process.patPFMetT2Corr.jetCorrLabelRes = cms.InputTag("L3Absolute")
 #    process.patPFMetT2SmearCorr.jetCorrLabelRes = cms.InputTag("L3Absolute")
 #    process.shiftedPatJetEnDown.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
-#    process.shiftedPatJetEnUp.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector")
-			           
+#    process.shiftedPatJetEnUp.jetCorrLabelUpToL3Res = cms.InputTag("ak4PFCHSL1FastL2L3Corrector"
+
+
+
+
+
+######## JEC ########
+jecLevelsAK8chs = []
+jecLevelsAK8Groomedchs = []
+jecLevelsAK4chs = []
+jecLevelsAK4 = []
+jecLevelsAK8Puppi = []
+jecLevelsForMET = []
+
+if config["BUNCHSPACING"] == 25 and config["RUNONMC"] :
+  JECprefix = ""
+  if ("Fall17" in options.RunPeriod):
+    JECprefix = "Fall17_17Nov2017_V32"
+  elif ("Summer16" in options.RunPeriod):
+    JECprefix = "Summer16_07Aug2017_V11"
+
+  jecAK8chsUncFile = "JEC/%s_MC_Uncertainty_AK8PFchs.txt"%(JECprefix)
+  jecAK4chsUncFile = "JEC/%s_MC_Uncertainty_AK4PFchs.txt"%(JECprefix)
+
+
+
+elif config["BUNCHSPACING"] == 25 and not(config["RUNONMC"]):
+
+   JEC_runDependent_suffix= ""
+   if ("2017" in options.RunPeriod):
+     if ("Run2017B" in  options.RunPeriod): JEC_runDependent_suffix= "B"
+     elif ("Run2017C" in  options.RunPeriod): JEC_runDependent_suffix= "C"
+     elif ("Run2017D" in  options.RunPeriod): JEC_runDependent_suffix= "D"
+     elif ("Run2017E" in  options.RunPeriod): JEC_runDependent_suffix= "E"
+     elif ("Run2017F" in  options.RunPeriod): JEC_runDependent_suffix= "F"
+     
+     JECprefix = "Fall17_17Nov2017"+JEC_runDependent_suffix+"_V32"
+   elif ("2016" in options.RunPeriod):
+     if ("Run2016D" in  options.RunPeriod or "Run2016B" in  options.RunPeriod  or "Run2016C" in  options.RunPeriod  ): JEC_runDependent_suffix= "ABC"
+     elif ("Run2016E" in  options.RunPeriod): JEC_runDependent_suffix= "EF"
+     elif ("Run2016G" in  options.RunPeriod): JEC_runDependent_suffix= "GH"
+     elif ("Run2016F" in  options.RunPeriod and  not options.runUpToEarlyF): JEC_runDependent_suffix= "GH"
+     elif ("Run2016F" in  options.RunPeriod and   options.runUpToEarlyF): JEC_runDependent_suffix= "EF"
+
+
+     JECprefix = "Summer16_07Aug2017"+JEC_runDependent_suffix+"_V11"
+
+   jecAK8chsUncFile = "JEC/%s_DATA_Uncertainty_AK8PFchs.txt"%(JECprefix)
+   jecAK4chsUncFile = "JEC/%s_DATA_Uncertainty_AK4PFchs.txt"%(JECprefix)
+   print "jec JEC_runDependent_suffix %s ,  prefix %s " %(JEC_runDependent_suffix,JECprefix)
+
+print "jec unc file for ak8 ", jecAK8chsUncFile
+print "doing corrections to jets on th fly %s, to met on the fly %s" %(config["CORRJETSONTHEFLY"],config["CORRMETONTHEFLY"])
+if config["CORRJETSONTHEFLY"]:
+   if config["RUNONMC"]:
+     jecLevelsAK8chs = [
+     	 'JEC/%s_MC_L1FastJet_AK8PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L2Relative_AK8PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L3Absolute_AK8PFchs.txt'%(JECprefix)
+       ]
+     jecLevelsAK8Groomedchs = [
+     	 'JEC/%s_MC_L2Relative_AK8PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L3Absolute_AK8PFchs.txt'%(JECprefix)
+       ]
+     jecLevelsAK8Puppi = [
+     	 'JEC/%s_MC_L2Relative_AK8PFPuppi.txt'%(JECprefix),
+     	 'JEC/%s_MC_L3Absolute_AK8PFPuppi.txt'%(JECprefix)
+       ]
+     jecLevelsAK4chs = [
+     	 'JEC/%s_MC_L1FastJet_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L2Relative_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L3Absolute_AK4PFchs.txt'%(JECprefix)
+       ]
+   else:
+     jecLevelsAK8chs = [
+     	 'JEC/%s_DATA_L1FastJet_AK8PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L2Relative_AK8PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L3Absolute_AK8PFchs.txt'%(JECprefix),
+         'JEC/%s_DATA_L2L3Residual_AK8PFchs.txt'%(JECprefix)
+       ]
+     jecLevelsAK8Groomedchs = [
+     	 'JEC/%s_DATA_L2Relative_AK8PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L3Absolute_AK8PFchs.txt'%(JECprefix),
+         'JEC/%s_DATA_L2L3Residual_AK8PFchs.txt'%(JECprefix)
+       ]
+     jecLevelsAK8Puppi = [
+     	 'JEC/%s_DATA_L2Relative_AK8PFPuppi.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L3Absolute_AK8PFPuppi.txt'%(JECprefix),
+         'JEC/%s_DATA_L2L3Residual_AK8PFPuppi.txt'%(JECprefix)
+       ]
+     jecLevelsAK4chs = [
+     	 'JEC/%s_DATA_L1FastJet_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L2Relative_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L3Absolute_AK4PFchs.txt'%(JECprefix),
+         'JEC/%s_DATA_L2L3Residual_AK4PFchs.txt'%(JECprefix)
+       ]   
+if config["CORRMETONTHEFLY"]:  
+   if config["RUNONMC"]:
+     jecLevelsForMET = [				       
+     	 'JEC/%s_MC_L1FastJet_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L2Relative_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_MC_L3Absolute_AK4PFchs.txt'%(JECprefix)
+       ]
+   else:       					       
+     jecLevelsForMET = [
+     	 'JEC/%s_DATA_L1FastJet_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L2Relative_AK4PFchs.txt'%(JECprefix),
+     	 'JEC/%s_DATA_L3Absolute_AK4PFchs.txt'%(JECprefix),
+         'JEC/%s_DATA_L2L3Residual_AK4PFchs.txt'%(JECprefix)
+       ]	
+      			    
+#from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector
+#process.goodSlimmedJets = cms.EDFilter("PFJetIDSelectionFunctorFilter",
+#                        filterParams = pfJetIDSelector.clone(),
+#                        src = cms.InputTag("slimmedJets")
+#                        )
+#process.goodFatJets = cms.EDFilter("PFJetIDSelectionFunctorFilter",
+#                        filterParams = pfJetIDSelector.clone(),
+#                        src = cms.InputTag(jetsAK8)
+#                        )
+######## JER ########
+if ("2017" in options.RunPeriod) or ("Fall17" in options.RunPeriod):
+  JERprefix = "Fall17_V3"
+if ("2016" in options.RunPeriod) or ("Summer16" in options.RunPeriod):
+  JERprefix = "Spring16_25nsV6"
+jerAK8chsFile_res = "JER/%s_MC_PtResolution_AK8PFchs.txt"%(JERprefix)
+jerAK4chsFile_res = "JER/%s_MC_PtResolution_AK4PFchs.txt"%(JERprefix)
+jerAK8PuppiFile_res = "JER/%s_MC_PtResolution_AK8PFPuppi.txt"%(JERprefix)
+jerAK4PuppiFile_res = "JER/%s_MC_PtResolution_AK4PFPuppi.txt"%(JERprefix)
+jerAK8chsFile_sf = "JER/%s_MC_SF_AK8PFchs.txt"%(JERprefix)
+jerAK4chsFile_sf = "JER/%s_MC_SF_AK4PFchs.txt"%(JERprefix)
+jerAK8PuppiFile_sf = "JER/%s_MC_SF_AK8PFPuppi.txt"%(JERprefix)
+jerAK4PuppiFile_sf = "JER/%s_MC_SF_AK4PFPuppi.txt"%(JERprefix)
+
+
+
+if config["GETJECFROMDBFILE"]:
+  from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+  
+  if config["RUNONMC"]:
+    process.jec = cms.ESSource('PoolDBESSource',
+        CondDBSetup,
+        connect = cms.string('sqlite:DB/Fall17_17Nov2017_V32_94X_MC.db'),
+        toGet = cms.VPSet(
+            cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string('JetCorrectorParametersCollection_Fall15_V2_MC_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs')
+            ),
+            cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string('JetCorrectorParametersCollection_Fall15_V2_MC_AK8PFchs'),
+                label  = cms.untracked.string('AK8PFchs')
+            ),
+            cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string('JetCorrectorParametersCollection_Fall15_V2_MC_AK8PFPuppi'),
+                label  = cms.untracked.string('AK8PFPuppi')
+            ),
+        )
+    )
+  else:
+    process.jec = cms.ESSource('PoolDBESSource',
+        CondDBSetup,
+        connect = cms.string('sqlite:DB/Fall17_17Nov2017_V32_94X_DATA.db'),
+        toGet = cms.VPSet(
+            cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string('JetCorrectorParametersCollection_Fall15_V2_DATA_AK4PFchs'),
+                label  = cms.untracked.string('AK4PFchs')
+            ),
+            cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string('JetCorrectorParametersCollection_Fall15_V2_DATA_AK8PFchs'),
+                label  = cms.untracked.string('AK8PFchs')
+            ),
+            cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string('JetCorrectorParametersCollection_Fall15_V2_DATA_AK8PFPuppi'),
+                label  = cms.untracked.string('AK8PFPuppi')
+            ),
+        )
+    )
+
+
+#  process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#  process.jec = cms.ESSource("PoolDBESSource",
+#            DBParameters = cms.PSet(
+#                messageLevel = cms.untracked.int32(5)
+#                ),
+#            timetype = cms.string('runnumber'),
+#            toGet = cms.VPSet(
+#            cms.PSet(
+#                 record = cms.string('JetCorrectionsRecord'),
+#                 tag    = cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_MC_AK4PFchs'),
+#                 label  = cms.untracked.string('AK4PFchs')
+#                 ),
+#            cms.PSet(
+#                 record = cms.string('JetCorrectionsRecord'),
+#                 tag    = cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_MC_AK8PFchs'),
+#                 label  = cms.untracked.string('AK8PFchs')
+#                 ),
+#            cms.PSet(
+#                 record = cms.string('JetCorrectionsRecord'),
+#                 tag    = cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_MC_AK8PFPuppi'),
+#                 label  = cms.untracked.string('AK8PFPuppi')
+#                 ),
+#            ),
+#            connect = cms.string('sqlite:JEC/Summer15_50nsV5_MC.db')
+#            )
+#  if not config["RUNONMC"]:
+#    process.jec.toGet[0].tag =  cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_DATA_AK4PFchs')
+#    process.jec.toGet[1].tag =  cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_DATA_AK8PFchs')
+#    process.jec.toGet[2].tag =  cms.string('JetCorrectorParametersCollection_Summer15_50nsV5_DATA_AK8PFPuppi')
+#    process.jec.connect = cms.string('sqlite:JEC/Summer15_50nsV5_DATA.db')
+  process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
+
+
+
+
+
+
+
 ####### Adding HEEP id ##########
 
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
@@ -786,130 +978,6 @@ else:
   BOOSTEDTAUS = "slimmedTaus" 
   
 
-######## JEC ########
-jecLevelsAK8chs = []
-jecLevelsAK8Groomedchs = []
-jecLevelsAK4chs = []
-jecLevelsAK4 = []
-jecLevelsAK8Puppi = []
-jecLevelsForMET = []
-
-if config["BUNCHSPACING"] == 25 and config["RUNONMC"] :
-  JECprefix = ""
-  if ("Fall17" in options.RunPeriod):
-    JECprefix = "Fall17_17Nov2017_V8"
-  elif ("Summer16" in options.RunPeriod):
-    JECprefix = "Summer16_07Aug2017_V11"
-
-  jecAK8chsUncFile = "JEC/%s_MC_Uncertainty_AK8PFchs.txt"%(JECprefix)
-  jecAK4chsUncFile = "JEC/%s_MC_Uncertainty_AK4PFchs.txt"%(JECprefix)
-
-
-
-elif config["BUNCHSPACING"] == 25 and not(config["RUNONMC"]):
-
-   JEC_runDependent_suffix= ""
-   if ("2017" in options.RunPeriod):
-     if ("Run2017B" in  options.RunPeriod): JEC_runDependent_suffix= "B"
-     elif ("Run2017C" in  options.RunPeriod): JEC_runDependent_suffix= "C"
-     elif ("Run2017D" in  options.RunPeriod): JEC_runDependent_suffix= "D"
-     elif ("Run2017E" in  options.RunPeriod): JEC_runDependent_suffix= "E"
-     elif ("Run2017F" in  options.RunPeriod): JEC_runDependent_suffix= "F"
-     
-     JECprefix = "Fall17_17Nov2017"+JEC_runDependent_suffix+"_V6"
-   elif ("2016" in options.RunPeriod):
-     if ("Run2016D" in  options.RunPeriod or "Run2016B" in  options.RunPeriod  or "Run2016C" in  options.RunPeriod  ): JEC_runDependent_suffix= "ABC"
-     elif ("Run2016E" in  options.RunPeriod): JEC_runDependent_suffix= "EF"
-     elif ("Run2016G" in  options.RunPeriod): JEC_runDependent_suffix= "GH"
-     elif ("Run2016F" in  options.RunPeriod and  not options.runUpToEarlyF): JEC_runDependent_suffix= "GH"
-     elif ("Run2016F" in  options.RunPeriod and   options.runUpToEarlyF): JEC_runDependent_suffix= "EF"
-
-
-     JECprefix = "Summer16_07Aug2017"+JEC_runDependent_suffix+"_V11"
-
-   jecAK8chsUncFile = "JEC/%s_DATA_Uncertainty_AK8PFchs.txt"%(JECprefix)
-   jecAK4chsUncFile = "JEC/%s_DATA_Uncertainty_AK4PFchs.txt"%(JECprefix)
-   print "jec JEC_runDependent_suffix %s ,  prefix %s " %(JEC_runDependent_suffix,JECprefix)
-
-print "jec unc file for ak8 ", jecAK8chsUncFile
-print "doing corrections to jets on th fly %s, to met on the fly %s" %(config["CORRJETSONTHEFLY"],config["CORRMETONTHEFLY"])
-if config["CORRJETSONTHEFLY"]:
-   if config["RUNONMC"]:
-     jecLevelsAK8chs = [
-     	 'JEC/%s_MC_L1FastJet_AK8PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L2Relative_AK8PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L3Absolute_AK8PFchs.txt'%(JECprefix)
-       ]
-     jecLevelsAK8Groomedchs = [
-     	 'JEC/%s_MC_L2Relative_AK8PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L3Absolute_AK8PFchs.txt'%(JECprefix)
-       ]
-     jecLevelsAK8Puppi = [
-     	 'JEC/%s_MC_L2Relative_AK8PFPuppi.txt'%(JECprefix),
-     	 'JEC/%s_MC_L3Absolute_AK8PFPuppi.txt'%(JECprefix)
-       ]
-     jecLevelsAK4chs = [
-     	 'JEC/%s_MC_L1FastJet_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L2Relative_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L3Absolute_AK4PFchs.txt'%(JECprefix)
-       ]
-   else:
-     jecLevelsAK8chs = [
-     	 'JEC/%s_DATA_L1FastJet_AK8PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L2Relative_AK8PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L3Absolute_AK8PFchs.txt'%(JECprefix),
-         'JEC/%s_DATA_L2L3Residual_AK8PFchs.txt'%(JECprefix)
-       ]
-     jecLevelsAK8Groomedchs = [
-     	 'JEC/%s_DATA_L2Relative_AK8PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L3Absolute_AK8PFchs.txt'%(JECprefix),
-         'JEC/%s_DATA_L2L3Residual_AK8PFchs.txt'%(JECprefix)
-       ]
-     jecLevelsAK8Puppi = [
-     	 'JEC/%s_DATA_L2Relative_AK8PFPuppi.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L3Absolute_AK8PFPuppi.txt'%(JECprefix),
-         'JEC/%s_DATA_L2L3Residual_AK8PFPuppi.txt'%(JECprefix)
-       ]
-     jecLevelsAK4chs = [
-     	 'JEC/%s_DATA_L1FastJet_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L2Relative_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L3Absolute_AK4PFchs.txt'%(JECprefix),
-         'JEC/%s_DATA_L2L3Residual_AK4PFchs.txt'%(JECprefix)
-       ]   
-if config["CORRMETONTHEFLY"]:  
-   if config["RUNONMC"]:
-     jecLevelsForMET = [				       
-     	 'JEC/%s_MC_L1FastJet_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L2Relative_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_MC_L3Absolute_AK4PFchs.txt'%(JECprefix)
-       ]
-   else:       					       
-     jecLevelsForMET = [
-     	 'JEC/%s_DATA_L1FastJet_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L2Relative_AK4PFchs.txt'%(JECprefix),
-     	 'JEC/%s_DATA_L3Absolute_AK4PFchs.txt'%(JECprefix),
-         'JEC/%s_DATA_L2L3Residual_AK4PFchs.txt'%(JECprefix)
-       ]	
-      			    
-#from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector
-#process.goodSlimmedJets = cms.EDFilter("PFJetIDSelectionFunctorFilter",
-#                        filterParams = pfJetIDSelector.clone(),
-#                        src = cms.InputTag("slimmedJets")
-#                        )
-#process.goodFatJets = cms.EDFilter("PFJetIDSelectionFunctorFilter",
-#                        filterParams = pfJetIDSelector.clone(),
-#                        src = cms.InputTag(jetsAK8)
-#                        )
-######## JER ########
-JERprefix = "Spring16_25nsV6"
-jerAK8chsFile_res = "JER/%s_MC_PtResolution_AK8PFchs.txt"%(JERprefix)
-jerAK4chsFile_res = "JER/%s_MC_PtResolution_AK4PFchs.txt"%(JERprefix)
-jerAK8PuppiFile_res = "JER/%s_MC_PtResolution_AK8PFPuppi.txt"%(JERprefix)
-jerAK4PuppiFile_res = "JER/%s_MC_PtResolution_AK4PFPuppi.txt"%(JERprefix)
-jerAK8chsFile_sf = "JER/%s_MC_SF_AK8PFchs.txt"%(JERprefix)
-jerAK4chsFile_sf = "JER/%s_MC_SF_AK4PFchs.txt"%(JERprefix)
-jerAK8PuppiFile_sf = "JER/%s_MC_SF_AK8PFPuppi.txt"%(JERprefix)
-jerAK4PuppiFile_sf = "JER/%s_MC_SF_AK4PFPuppi.txt"%(JERprefix)
                                                                                            
 ################## Ntuplizer ###################
 process.ntuplizer = cms.EDAnalyzer("Ntuplizer",
